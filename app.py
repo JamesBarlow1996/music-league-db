@@ -17,7 +17,7 @@ st.markdown('<div class="wordart-title">Paddys leaving clinks music league</div>
 st.markdown('<div class="marquee-box"><span class="marquee-text">★ WELCOME TO THE MUSIC LEAGUE ★ DIG INTO SOME MUSIC LEAGUE METRICS ★ MUSIC IS THE WINNER ★</span></div>', unsafe_allow_html=True)
 intro, dog = st.columns([1, 1.15])
 with intro:
-    st.markdown('<div class="retro-slogan">100% pretty neat</div><div class="retro-orange">FREE!</div><br><br><div class="retro-purple">phat stats</div><br><br><div class="retro-outline">Remember good music?</div><br><br><span class="visitor">YOU ARE VISITOR #000027</span><p class="blink">● SITE UNDER CONSTRUCTION ●</p>', unsafe_allow_html=True)
+    st.markdown('<div class="retro-slogan">100% pretty neat</div><div class="retro-orange">FREE!</div><br><br><div class="retro-purple">phat stats</div><br><br><div class="retro-outline">Remember good music?</div><br><br><span class="visitor">YOU ARE VISITOR #000027</span><p class="blink">● EAGER MEAGER ●</p>', unsafe_allow_html=True)
 with dog:
     st.image("assets/logos/headphone-dog.png", caption="Wowe this song is shite", width="stretch")
 c1,c2,c3,c4 = st.columns(4); c1.metric("Players", len(players)); c2.metric("Rounds", submissions.round_id.nunique()); c3.metric("Songs", len(submissions)); c4.metric("Explicit votes", len(votes))
