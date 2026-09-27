@@ -1,0 +1,25 @@
+{
+  "player_count": 15,
+  "round_count": 2,
+  "submission_count": 27,
+  "vote_count": 212,
+  "submissions_per_round": {
+    "41231daba67e4fec83b2246fac643912": 13,
+    "9c8d21a14792425e90d01a2c53be0a89": 14
+  },
+  "voters_per_round": {
+    "41231daba67e4fec83b2246fac643912": 13,
+    "9c8d21a14792425e90d01a2c53be0a89": 14
+  },
+  "point_distribution": {
+    "-4": 2,
+    "-3": 3,
+    "-2": 13,
+    "-1": 65,
+    "0": 4,
+    "1": 95,
+    "2": 23,
+    "3": 7
+  },
+  "self_vote_count": 0
+}
