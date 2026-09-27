@@ -36,6 +36,7 @@ def apply_retro_theme():
             font-weight:700 !important;
         }
         div[data-testid="stImage"] img { border:8px ridge #c0c0c0; box-shadow:8px 8px 0 #26266f; }
+        [data-testid="stIFrame"] { border:7px ridge #d8d8d8; background:#c0c0c0; padding:6px; box-shadow:6px 6px 0 #5454a8; margin-bottom:20px; }
         .wordart-title {
             font-family: Impact, "Arial Black", sans-serif;
             font-size: clamp(2.7rem, 8vw, 6.7rem);
