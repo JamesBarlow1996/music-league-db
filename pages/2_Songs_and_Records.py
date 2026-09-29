@@ -46,8 +46,8 @@ COLUMN_HELP = {
 
 def table(title, description, frame, columns, sort_column, ascending=False):
     st.subheader(title)
-    st.caption(description)
-    shown = frame.sort_values(sort_column, ascending=ascending).head(20)[columns].copy()
+    shown = frame.sort_values(sort_column, ascending=ascending, na_position="last")[columns].copy()
+    st.caption(f"{description} Showing all {len(shown):,} songs.")
     config = {column: st.column_config.Column(column, help=COLUMN_HELP.get(column)) for column in columns}
     st.dataframe(shown, hide_index=True, use_container_width=True, column_config=config)
 
