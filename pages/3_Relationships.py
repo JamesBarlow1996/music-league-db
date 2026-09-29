@@ -1,6 +1,6 @@
 import streamlit as st
 from src.dashboard import load_data
-from src.metrics import relationships, voting_summary, kingmaker_summary
+from src.metrics import relationships, voting_summary, kingmaker_summary, participating_players
 from src.ui import award_card
 from src.theme import apply_retro_theme
 
@@ -11,7 +11,7 @@ if not {"submissions", "votes", "players"}.issubset(data):
     st.info("Run refresh_data.py first to create the processed tables.")
     st.stop()
 
-players = data["players"]
+players = participating_players(data["players"], data["submissions"])
 names = players.set_index("player_id")["player_name"]
 voting = voting_summary(data["votes"], players)
 left, right = st.columns(2)

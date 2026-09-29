@@ -1,6 +1,6 @@
 import streamlit as st
 from src.dashboard import load_data
-from src.metrics import player_summary, player_song_summary, comment_summary
+from src.metrics import player_summary, player_song_summary, comment_summary, participating_players
 from src.ui import award_card
 from src.theme import apply_retro_theme
 
@@ -11,7 +11,8 @@ if "submissions" not in data or "players" not in data:
     st.info("Run refresh_data.py first to create the processed tables.")
     st.stop()
 
-leaderboard = player_summary(data["submissions"], data["players"])
+award_players = participating_players(data["players"], data["submissions"])
+leaderboard = player_summary(data["submissions"], award_players)
 st.subheader("Overall standings")
 st.caption("The main league table, plus how each player got there.")
 standings = leaderboard.rename(columns={"rank":"Position", "player_name":"Player", "total_points":"Total points", "submissions":"Songs submitted", "average_points":"Average points", "wins":"Wins", "podiums":"Podiums"})
@@ -19,7 +20,7 @@ st.dataframe(standings[["Position", "Player", "Total points", "Songs submitted",
 
 st.subheader("Player record leaderboards")
 st.caption("These turn the song records into player averages, so one wild song does not decide the whole table.")
-player_records = player_song_summary(data["submissions"], data["votes"], data["players"])
+player_records = player_song_summary(data["submissions"], data["votes"], award_players)
 record_names = player_records.rename(columns={"rank":"Overall position", "player_name":"Player", "total_points":"Total points", "average_points":"Average points", "wins":"Wins", "podiums":"Podiums", "average_engagement":"Average engagement", "average_marmite":"Average Marmite spread"})
 tab_overall, tab_engagement, tab_marmite = st.tabs(["Overall", "Engagement", "Marmite"])
 with tab_overall:
@@ -33,7 +34,7 @@ with tab_marmite:
     st.caption("Average gap between the highest and lowest votes on each player's songs. Downvotes count.")
     st.dataframe(record_names[["Player", "Average Marmite spread"]].sort_values("Average Marmite spread", ascending=False), hide_index=True, use_container_width=True)
 
-comments = comment_summary(data.get("comments"), data["players"])
+comments = comment_summary(data.get("comments"), award_players)
 most_vocal = comments.sort_values("total_words", ascending=False).iloc[0]
 mute = comments.sort_values(["total_words", "comment_count"]).iloc[0]
 regulars = comments.loc[comments["comment_count"] >= 3]

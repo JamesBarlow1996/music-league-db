@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import numpy as np
 from src.dashboard import load_data
 from src.metrics import taste_summary
 from src.ui import award_card
@@ -39,9 +40,24 @@ award_card(row[1], "Underground", underground["track_name"], f'{underground["pop
 st.subheader("Mainstream vs League")
 st.caption("Does being popular on Spotify actually help a song in this league?")
 scatter = tracks.merge(data["players"][["player_id", "player_name"]], on="player_id", how="left")
-correlation = scatter[["popularity_score", "total_points"]].corr().iloc[0, 1]
+valid_scatter = scatter.dropna(subset=["popularity_score", "total_points"])
+correlation = valid_scatter[["popularity_score", "total_points"]].corr().iloc[0, 1]
+strength = "little" if abs(correlation) < 0.2 else "a weak" if abs(correlation) < 0.4 else "a moderate" if abs(correlation) < 0.6 else "a strong"
+direction = "positive" if correlation > 0 else "negative" if correlation < 0 else "flat"
 st.metric("Popularity/points correlation", f"{correlation:.2f}")
-st.plotly_chart(px.scatter(scatter, x="popularity_score", y="total_points", hover_name="track_name", hover_data={"artist_display":True, "player_name":True}, color="player_name", labels={"popularity_score":"Spotify popularity", "total_points":"Music League points", "player_name":"Submitted by"}), use_container_width=True)
+if direction == "positive":
+    st.caption(f"There is {strength} positive relationship: more popular Spotify tracks tend to score a little better here.")
+elif direction == "negative":
+    st.caption(f"There is {strength} negative relationship: less popular Spotify tracks tend to score a little better here.")
+else:
+    st.caption("Spotify popularity and league points are basically unrelated.")
+figure = px.scatter(valid_scatter, x="popularity_score", y="total_points", hover_name="track_name", hover_data={"artist_display":True, "player_name":True}, color="player_name", labels={"popularity_score":"Spotify popularity", "total_points":"Music League points", "player_name":"Submitted by"})
+if len(valid_scatter) >= 2 and valid_scatter["popularity_score"].nunique() > 1:
+    slope, intercept = np.polyfit(valid_scatter["popularity_score"], valid_scatter["total_points"], 1)
+    line_x = np.array([valid_scatter["popularity_score"].min(), valid_scatter["popularity_score"].max()])
+    figure.add_scatter(x=line_x, y=slope * line_x + intercept, mode="lines", name="Overall trend", line={"color":"#ff00aa", "width":4, "dash":"dash"})
+figure.update_layout(legend_title_text="Player / analysis")
+st.plotly_chart(figure, use_container_width=True)
 
 st.subheader("Era awards")
 old_soul = eligible.sort_values("average_release_year").iloc[0]

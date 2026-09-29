@@ -2,6 +2,11 @@
 import numpy as np
 import pandas as pd
 
+def participating_players(players, submissions):
+    """Players who have submitted at least one song in any round."""
+    participant_ids = submissions["player_id"].dropna().unique()
+    return players.loc[players["player_id"].isin(participant_ids)].copy()
+
 def vote_opportunities(submissions, votes, players):
     rows = []
     for round_id, group in submissions.groupby("round_id"):
@@ -80,6 +85,7 @@ def comment_summary(comments, players):
     return result.fillna({"comment_count": 0, "total_words": 0, "average_words": 0, "submissions_commented_on": 0})
 
 def player_song_summary(submissions, votes, players):
+    players = participating_players(players, submissions)
     songs = song_metrics(submissions, votes, players)
     records = songs.groupby("player_id").agg(average_engagement=("engagement_rate", "mean"), average_marmite=("marmite_spread", "mean"), most_marmite_song=("marmite_spread", "max")).reset_index()
     return player_summary(submissions, players).merge(records, on="player_id", how="left")

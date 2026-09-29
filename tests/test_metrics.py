@@ -1,5 +1,5 @@
 import pandas as pd
-from src.metrics import song_metrics
+from src.metrics import song_metrics, participating_players
 def test_engagement_counts_explicit_zero():
     subs=pd.DataFrame([{"submission_id":"s","round_id":"r","player_id":"a","total_points":0,"track_name":"x","artist_display":"y"}])
     votes=pd.DataFrame([{"submission_id":"s","round_id":"r","voter_player_id":"b","points":0,"vote_comment":None}])
@@ -12,3 +12,8 @@ def test_marmite_uses_full_vote_spread():
     players=pd.DataFrame([{"player_id":"a"},{"player_id":"b"},{"player_id":"c"}])
     result= song_metrics(subs,votes,players).set_index("submission_id")
     assert result.loc["s", "marmite_spread"] == 5
+
+def test_award_players_must_have_submitted():
+    players=pd.DataFrame([{"player_id":"active"},{"player_id":"inactive"}])
+    submissions=pd.DataFrame([{"player_id":"active"}])
+    assert participating_players(players, submissions)["player_id"].tolist() == ["active"]

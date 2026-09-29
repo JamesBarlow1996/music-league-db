@@ -1,6 +1,6 @@
 import streamlit as st
 from src.dashboard import load_data
-from src.metrics import player_summary, song_metrics
+from src.metrics import player_summary, song_metrics, participating_players
 from src.player_cards import build_player_cards
 from src.theme import apply_retro_theme
 
@@ -12,7 +12,8 @@ if not data or "submissions" not in data:
     st.markdown('<div class="wordart-title">Paddys leaving clinks music league</div>', unsafe_allow_html=True)
     st.info("Drop the four CSV exports into data/raw, then run python refresh_data.py."); st.stop()
 players, submissions, votes = data["players"], data["submissions"], data["votes"]
-summary = player_summary(submissions, players); songs = song_metrics(submissions, votes, players)
+award_players = participating_players(players, submissions)
+summary = player_summary(submissions, award_players); songs = song_metrics(submissions, votes, award_players)
 st.markdown('<div class="wordart-title">Paddys leaving clinks music league</div>', unsafe_allow_html=True)
 st.markdown('<div class="marquee-box"><span class="marquee-text">★ WELCOME TO THE MUSIC LEAGUE ★ DIG INTO SOME MUSIC LEAGUE METRICS ★ MUSIC IS THE WINNER ★</span></div>', unsafe_allow_html=True)
 intro, dog = st.columns([1, 1.15])
