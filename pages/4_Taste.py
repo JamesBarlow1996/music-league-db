@@ -39,9 +39,8 @@ award_card(row[1], "Underground", underground["track_name"], f'{underground["pop
 st.subheader("Mainstream vs League")
 st.caption("Does being popular on Spotify actually help a song in this league?")
 scatter = tracks.merge(data["players"][["player_id", "player_name"]], on="player_id", how="left")
-valid_scatter = scatter.dropna(subset=["total_points"]).copy()
-scored_scatter = valid_scatter.dropna(subset=["popularity_score"])
-correlation = scored_scatter[["popularity_score", "total_points"]].corr().iloc[0, 1]
+valid_scatter = scatter.dropna(subset=["popularity_score", "total_points"])
+correlation = valid_scatter[["popularity_score", "total_points"]].corr().iloc[0, 1]
 strength = "little" if abs(correlation) < 0.2 else "a weak" if abs(correlation) < 0.4 else "a moderate" if abs(correlation) < 0.6 else "a strong"
 direction = "positive" if correlation > 0 else "negative" if correlation < 0 else "flat"
 st.metric("Popularity/points correlation", f"{correlation:.2f}")
@@ -51,13 +50,9 @@ elif direction == "negative":
     st.caption(f"There is {strength} negative relationship: less popular Spotify tracks tend to score a little better here.")
 else:
     st.caption("Spotify popularity and league points are basically unrelated.")
-valid_scatter["chart_popularity"] = valid_scatter["popularity_score"].fillna(-1)
-valid_scatter["Spotify score status"] = valid_scatter["popularity_score"].notna().map({True: "Available", False: "Unknown"})
-figure = px.scatter(valid_scatter, x="chart_popularity", y="total_points", hover_name="track_name", hover_data={"artist_display":True, "player_name":True, "Spotify score status":True}, color="player_name", labels={"chart_popularity":"Spotify popularity", "total_points":"Music League points", "player_name":"Submitted by"})
-figure.update_xaxes(tickvals=[-1, 0, 20, 40, 60, 80, 100], ticktext=["Unknown", "0", "20", "40", "60", "80", "100"], range=[-5, 100])
+figure = px.scatter(valid_scatter, x="popularity_score", y="total_points", hover_name="track_name", hover_data={"artist_display":True, "player_name":True}, color="player_name", labels={"popularity_score":"Spotify popularity", "total_points":"Music League points", "player_name":"Submitted by"})
 figure.update_layout(legend_title_text="Submitted by")
 st.plotly_chart(figure, use_container_width=True)
-st.caption(f"Showing all {len(valid_scatter)} songs; {len(valid_scatter) - len(scored_scatter)} have no Spotify popularity score and are shown as Unknown.")
 
 st.subheader("Era awards")
 old_soul = eligible.sort_values("average_release_year").iloc[0]
