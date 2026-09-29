@@ -1,6 +1,5 @@
 import streamlit as st
 import plotly.express as px
-import numpy as np
 from src.dashboard import load_data
 from src.metrics import taste_summary
 from src.ui import award_card
@@ -52,11 +51,7 @@ elif direction == "negative":
 else:
     st.caption("Spotify popularity and league points are basically unrelated.")
 figure = px.scatter(valid_scatter, x="popularity_score", y="total_points", hover_name="track_name", hover_data={"artist_display":True, "player_name":True}, color="player_name", labels={"popularity_score":"Spotify popularity", "total_points":"Music League points", "player_name":"Submitted by"})
-if len(valid_scatter) >= 2 and valid_scatter["popularity_score"].nunique() > 1:
-    slope, intercept = np.polyfit(valid_scatter["popularity_score"], valid_scatter["total_points"], 1)
-    line_x = np.array([valid_scatter["popularity_score"].min(), valid_scatter["popularity_score"].max()])
-    figure.add_scatter(x=line_x, y=slope * line_x + intercept, mode="lines", name="Overall trend", line={"color":"#ff00aa", "width":4, "dash":"dash"})
-figure.update_layout(legend_title_text="Player / analysis")
+figure.update_layout(legend_title_text="Submitted by")
 st.plotly_chart(figure, use_container_width=True)
 
 st.subheader("Era awards")
