@@ -9,7 +9,7 @@ Mobile-friendly Streamlit analytics for Music League exports.
 3. Build processed data: `python refresh_data.py`.
 4. Run: `streamlit run app.py`.
 
-Spotify is the first enrichment source. The refresh uses the exact `spotify:track:<id>` from each submission with the Spotify Web API track endpoint, then falls back to Spotify search only when the ID is missing or unavailable. It caches responses in `data/cache/spotify_cache.json` and writes `data/processed/track_enrichment.parquet`. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `.env` before refreshing. Native metrics work without API keys. Ranks use competition ranking (`1, 2, 2, 4`), and explicit zero-point votes count as engagement while missing rows do not.
+Spotify is the first enrichment source. The refresh uses the exact `spotify:track:<id>` from each submission with the Spotify Web API track endpoint, then falls back to Spotify search only when the ID is missing or unavailable. It caches responses in `data/cache/spotify_cache.json` and writes `data/processed/track_enrichment.parquet`. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `.env` before refreshing. Native metrics work without API keys. Round positions are ordered by total points, distinct positive voters, fewest downvoters, then highest single positive vote; exact matches use competition ranking (`1, 1, 3`). Explicit zero-point votes count as engagement while missing rows do not.
 
 ## Deploy to Streamlit Community Cloud
 

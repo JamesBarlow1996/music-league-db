@@ -19,6 +19,42 @@ def _require(df, columns, name):
     if missing:
         raise ValueError(f"{name} is missing columns: {sorted(missing)}")
 
+def derive_round_ranks(submissions, votes):
+    """Rank submissions using Music League's observed round tie-break order.
+
+    Order by total points, distinct voters giving positive points, fewest
+    downvoters, then the largest positive vote from one voter. The downvote
+    check resolves signed-vote ties that the positive-voter count cannot.
+    Exact matches remain tied and use competition ranking (1, 1, 3).
+    """
+    result = submissions.copy()
+    positive = votes.loc[votes["points"] > 0]
+    tie_breaks = positive.groupby("submission_id").agg(
+        positive_voter_count=("voter_player_id", "nunique"),
+        highest_single_vote=("points", "max"),
+    )
+    negative_voters = votes.loc[votes["points"] < 0].groupby("submission_id")["voter_player_id"].nunique()
+    result["positive_voter_count"] = result["submission_id"].map(tie_breaks["positive_voter_count"]).fillna(0).astype(int)
+    result["negative_voter_count"] = result["submission_id"].map(negative_voters).fillna(0).astype(int)
+    result["highest_single_vote"] = result["submission_id"].map(tie_breaks["highest_single_vote"]).fillna(0).astype(int)
+    result["round_rank"] = 0
+    for _, group in result.groupby("round_id"):
+        ordered = group.sort_values(
+            ["total_points", "positive_voter_count", "negative_voter_count", "highest_single_vote"],
+            ascending=[False, False, True, False],
+            kind="stable",
+        )
+        previous = None
+        rank = 0
+        for position, row in enumerate(ordered.itertuples(), start=1):
+            key = (row.total_points, row.positive_voter_count, row.negative_voter_count, row.highest_single_vote)
+            if key != previous:
+                rank = position
+                previous = key
+            result.loc[row.Index, "round_rank"] = rank
+    result["round_rank"] = result["round_rank"].astype(int)
+    return result
+
 def load_export(raw_dir=RAW_DIR):
     raw = _read(raw_dir)
     competitors, rounds = raw["competitors"].copy(), raw["rounds"].copy()
@@ -51,7 +87,7 @@ def load_export(raw_dir=RAW_DIR):
     vote["submitted_by_player_id"] = vote.apply(lambda x: submitter_by_key[(x.round_id, x.spotify_uri)], axis=1)
     vote = vote[["round_id", "submission_id", "voter_player_id", "submitted_by_player_id", "voted_at", "points", "vote_comment"]]
     sub["total_points"] = sub.submission_id.map(vote.groupby("submission_id").points.sum()).fillna(0).astype(int)
-    sub["round_rank"] = sub.groupby("round_id").total_points.rank(method="min", ascending=False).astype(int)
+    sub = derive_round_ranks(sub, vote)
     comments = []
     for row in sub.itertuples():
         if row.submission_comment: comments.append({"comment_id": stable_id(row.submission_id, row.player_id, "submission"), "round_id": row.round_id, "submission_id": row.submission_id, "commenter_player_id": row.player_id, "comment_type": "submission_note", "comment_text": row.submission_comment, "created_at": row.submitted_at})
