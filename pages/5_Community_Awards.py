@@ -37,15 +37,16 @@ progression["total_points"] = progression["total_points"].fillna(0)
 progression = progression.sort_values(["player_id", "round_number"])
 progression["cumulative_points"] = progression.groupby("player_id")["total_points"].cumsum()
 progression = progression.sort_values("round_number")
+progression["chart_player_name"] = progression["player_name"].str.replace(r"^\s*\d+\s*", "", regex=True)
 
 progression_chart = px.line(
     progression,
     x="round_name",
     y="cumulative_points",
-    color="player_name",
+    color="chart_player_name",
     markers=True,
     custom_data=["total_points"],
-    labels={"round_name": "Round", "cumulative_points": "Cumulative points", "player_name": "Player", "total_points": "Round points"},
+    labels={"round_name": "Round", "cumulative_points": "Cumulative points", "chart_player_name": "Player", "total_points": "Round points"},
 )
 progression_chart.update_traces(
     line={"shape": "spline", "smoothing": 1.1},
