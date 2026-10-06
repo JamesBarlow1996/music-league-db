@@ -1,27 +1,32 @@
 {
-  "player_count": 15,
-  "round_count": 3,
-  "submission_count": 41,
-  "vote_count": 332,
+  "player_count": 16,
+  "round_count": 5,
+  "submission_count": 70,
+  "vote_count": 559,
   "submissions_per_round": {
+    "20c84e52203d45f4bae6bc7cb12a4241": 14,
     "41231daba67e4fec83b2246fac643912": 13,
     "453240a24157467897e3b0249f6554e9": 14,
-    "9c8d21a14792425e90d01a2c53be0a89": 14
+    "9c8d21a14792425e90d01a2c53be0a89": 14,
+    "b95ebf94068a4e86a799941350ede335": 15
   },
   "voters_per_round": {
+    "20c84e52203d45f4bae6bc7cb12a4241": 14,
     "41231daba67e4fec83b2246fac643912": 13,
     "453240a24157467897e3b0249f6554e9": 14,
-    "9c8d21a14792425e90d01a2c53be0a89": 14
+    "9c8d21a14792425e90d01a2c53be0a89": 14,
+    "b95ebf94068a4e86a799941350ede335": 15
   },
   "point_distribution": {
-    "-4": 3,
-    "-3": 3,
-    "-2": 21,
-    "-1": 101,
-    "0": 13,
-    "1": 145,
-    "2": 37,
-    "3": 9
+    "-4": 5,
+    "-3": 8,
+    "-2": 38,
+    "-1": 160,
+    "0": 25,
+    "1": 245,
+    "2": 62,
+    "3": 15,
+    "6": 1
   },
   "self_vote_count": 0
 }

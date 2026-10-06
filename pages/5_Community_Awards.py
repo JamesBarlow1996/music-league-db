@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.express as px
 from src.dashboard import load_data
 from src.metrics import player_summary, player_song_summary, comment_summary, participating_players
 from src.ui import award_card
@@ -17,6 +18,41 @@ st.subheader("Overall standings")
 st.caption("The main league table, plus how each player got there.")
 standings = leaderboard.rename(columns={"rank":"Position", "player_name":"Player", "total_points":"Total points", "submissions":"Songs submitted", "average_points":"Average points", "wins":"Wins", "podiums":"Podiums"})
 st.dataframe(standings[["Position", "Player", "Total points", "Songs submitted", "Average points", "Wins", "Podiums"]], hide_index=True, use_container_width=True, column_config={"Position": st.column_config.NumberColumn(help="League position based on total points."), "Average points": st.column_config.NumberColumn(help="Total points divided by songs submitted.", format="%.1f"), "Wins": st.column_config.NumberColumn(help="How many songs finished first."), "Podiums": st.column_config.NumberColumn(help="How many songs finished in the top three.")})
+
+st.subheader("Cumulative points over time")
+st.caption("Each line shows how a player's total score has built up round by round. Curves are smoothed visually; markers show the actual round totals.")
+rounds = data.get("rounds")
+if rounds is not None and {"round_id", "round_name", "round_number"}.issubset(rounds.columns):
+    round_axis = rounds[["round_id", "round_name", "round_number"]].drop_duplicates("round_id").sort_values("round_number")
+else:
+    round_axis = data["submissions"][["round_id"]].drop_duplicates().sort_values("round_id")
+    round_axis["round_name"] = round_axis["round_id"]
+    round_axis["round_number"] = range(1, len(round_axis) + 1)
+
+players_axis = award_players[["player_id", "player_name"]].drop_duplicates()
+progression = round_axis.merge(players_axis, how="cross")
+round_points = data["submissions"].groupby(["round_id", "player_id"], as_index=False)["total_points"].sum()
+progression = progression.merge(round_points, on=["round_id", "player_id"], how="left")
+progression["total_points"] = progression["total_points"].fillna(0)
+progression = progression.sort_values(["player_id", "round_number"])
+progression["cumulative_points"] = progression.groupby("player_id")["total_points"].cumsum()
+progression = progression.sort_values("round_number")
+
+progression_chart = px.line(
+    progression,
+    x="round_name",
+    y="cumulative_points",
+    color="player_name",
+    markers=True,
+    custom_data=["total_points"],
+    labels={"round_name": "Round", "cumulative_points": "Cumulative points", "player_name": "Player", "total_points": "Round points"},
+)
+progression_chart.update_traces(
+    line={"shape": "spline", "smoothing": 1.1},
+    hovertemplate="%{fullData.name}<br>%{x}<br>Cumulative points: %{y}<br>Round points: %{customdata[0]}<extra></extra>",
+)
+progression_chart.update_layout(hovermode="x unified", legend_title_text="Player")
+st.plotly_chart(progression_chart, use_container_width=True)
 
 st.subheader("Player record leaderboards")
 st.caption("These turn the song records into player averages, so one wild song does not decide the whole table.")
